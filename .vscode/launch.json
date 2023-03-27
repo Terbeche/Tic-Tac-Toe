@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Love2D",
+          "type": "lua",
+          "request": "launch",
+          "program": "C:/Program Files/LOVE",
+          "args": [
+              "${workspaceFolder}"
+          ]
+      }
+  ]
+}
