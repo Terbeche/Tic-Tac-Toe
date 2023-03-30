@@ -3,10 +3,9 @@ local gridSymbols = {{"", "", ""}, {"", "", ""}, {"", "", ""}}
 
 local currentPlayer = 0
 local playerSymbol = ""
-
+local playerTurn = false
 local screenWidth = love.graphics.getWidth()
 local screenHeight = love.graphics.getHeight()
-
 local button = {
 
     width = 180,
@@ -32,6 +31,26 @@ function isInsideButton(x, y, button)
     return false
 end
 
+function aiPlay(aiSymbol)
+    local row, col = getAiMove()
+    gridSymbols[row][col] = aiSymbol
+    playerTurn = true
+    print("AI played " .. aiSymbol .. " at " .. row .. ", " .. col)
+end
+
+function getAiMove()
+    local availableCells = {}
+    for row, rowValues in ipairs(gridSymbols) do
+        for col, symbol in ipairs(rowValues) do
+            if symbol == "" then
+                table.insert(availableCells, {row, col})
+            end
+        end
+    end
+    local index = math.random(#availableCells)
+    return unpack(availableCells[index])
+end
+
 function love.mousepressed(x, y, buttonPressed)
     if not playerTurn then
         return
@@ -42,24 +61,19 @@ function love.mousepressed(x, y, buttonPressed)
 
         if insideButton then
             if gridSymbols[row][col] == "" then
-                if currentPlayer == 1 then
-                    gridSymbols[row][col] = playerSymbol
-                    print("Player 1 played " .. playerSymbol .. " at " .. row .. ", " .. col)
-
-                else
-                    -- aiPlay(aiSymbol)
-                end
-
-                playerTurn = not playerTurn
+                gridSymbols[row][col] = playerSymbol
+                print("Player 1 played " .. playerSymbol .. " at " .. row .. ", " .. col)
+                aiPlay(aiSymbol)
+                playerTurn = true
             end
         end
     end
 end
 
 function love.load()
-    -- currentPlayer = math.random(2)
+    currentPlayer = math.random(2)
+
     currentPlayer = 1
-    playerTurn = false
     if math.random(2) == 1 then
         playerSymbol = "X"
         aiSymbol = "O"
@@ -70,12 +84,9 @@ function love.load()
 
     if currentPlayer == 1 then
         playerTurn = true
-        -- playerPlay(playerSymbol)
     else
         playerTurn = false
-        print("AI's turn")
-        print('Ai playing  with ' .. aiSymbol)
-        aiPlay(aiSymbol, button.x + button.width, button.y + button.height)
+        aiPlay(aiSymbol)
     end
 
 end
@@ -92,18 +103,12 @@ function love.draw()
 
             love.graphics.setColor(1, 1, 1)
             love.graphics.rectangle("line", cellX, cellY, button.width, button.height)
-        end
-    end
 
-    for row, rowValues in ipairs(gridSymbols) do
-        for col, symbol in ipairs(rowValues) do
-            local cellX = button.x + (col - 1) * button.width
-            local cellY = button.y + (row - 1) * button.height
-            if symbol ~= "" then
-
+            if gridSymbols[row][col] ~= "" then
                 love.graphics.setColor(1, 0, 0)
-                love.graphics.print(symbol, cellX + button.width / 2, cellY + button.height / 2)
+                love.graphics.print(gridSymbols[row][col], cellX + button.width / 2, cellY + button.height / 2)
             end
         end
     end
 end
+
