@@ -31,11 +31,61 @@ function isInsideButton(x, y, button)
     return false
 end
 
+function checkEnd()
+    for row = 1, 3 do
+        if gridSymbols[row][1] ~= "" and gridSymbols[row][1] == gridSymbols[row][2] and gridSymbols[row][2] ==
+            gridSymbols[row][3] then
+            print("Game ended. Winner: " .. gridSymbols[row][1])
+            return true
+        end
+    end
+
+    for col = 1, 3 do
+        if gridSymbols[1][col] ~= "" and gridSymbols[1][col] == gridSymbols[2][col] and gridSymbols[2][col] ==
+            gridSymbols[3][col] then
+            print("Game ended. Winner: " .. gridSymbols[1][col])
+            return true
+        end
+    end
+
+    if gridSymbols[1][1] ~= "" and gridSymbols[1][1] == gridSymbols[2][2] and gridSymbols[2][2] == gridSymbols[3][3] then
+        print("Game ended. Winner: " .. gridSymbols[1][1])
+        return true
+    end
+
+    if gridSymbols[1][3] ~= "" and gridSymbols[1][3] == gridSymbols[2][2] and gridSymbols[2][2] == gridSymbols[3][1] then
+        print("Game ended. Winner: " .. gridSymbols[1][3])
+        return true
+    end
+
+    -- Check for tie
+    local tie = true
+    for row, rowValues in ipairs(gridSymbols) do
+        for col, symbol in ipairs(rowValues) do
+            if symbol == "" then
+                tie = false
+                break
+            end
+        end
+    end
+    if tie then
+        print("Game ended in a tie.")
+        return true
+    end
+
+    return false
+end
+
 function aiPlay(aiSymbol)
+
     local row, col = getAiMove()
     gridSymbols[row][col] = aiSymbol
     playerTurn = true
     print("AI played " .. aiSymbol .. " at " .. row .. ", " .. col)
+    endGame = checkEnd()
+    if endGame then
+        return
+    end
 end
 
 function getAiMove()
@@ -52,6 +102,9 @@ function getAiMove()
 end
 
 function love.mousepressed(x, y, buttonPressed)
+    if endGame then
+        return
+    end
     if not playerTurn then
         return
     end
@@ -63,11 +116,16 @@ function love.mousepressed(x, y, buttonPressed)
             if gridSymbols[row][col] == "" then
                 gridSymbols[row][col] = playerSymbol
                 print("Player 1 played " .. playerSymbol .. " at " .. row .. ", " .. col)
+                endGame = checkEnd()
+                if endGame then
+                    return
+                end
                 aiPlay(aiSymbol)
                 playerTurn = true
             end
         end
     end
+
 end
 
 function love.load()
